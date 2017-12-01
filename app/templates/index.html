@@ -1,0 +1,54 @@
+<!doctype html>
+<html<% if (includeModernizr) { %> class="no-js"<% } %> lang="">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <meta name="renderer" content="webkit">
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+    <title><%= appname %></title>
+    
+    <!-- build:css styles/vendor.css -->
+    <!-- bower:css -->
+    <!-- endbower -->
+    <!-- endbuild -->
+
+    <!-- build:css styles/main.css -->
+    <link rel="stylesheet" href="styles/main.css">
+    <!-- endbuild -->
+
+    <% if (includeModernizr) { %>
+    <!-- build:js scripts/vendor/modernizr.js -->
+    <script src="../scripts/vendor/modernizr/modernizr.js"></script>
+    <!-- endbuild -->
+    <% } %>
+
+  </head>
+  <body>
+    <!--[if IE]>
+      <p class="browserupgrade" style="">你正在使用<strong style="color:red">过时的</strong>浏览器，可能存在一定安全隐患，建议<a href="http://browsehappy.com/" style="color:red">点击这里</a>升级你的浏览器</p>
+    <![endif]-->
+    <% if (includeBootstrap) { %>
+      <div class="jumbotron">
+        <h1>欢迎使用fogeyWebapp脚手架项目</h1>
+        <p>作者: <a href="https://github.com/DeanTG">Dean</a></p>
+        <p><a class="btn btn-primary btn-lg" href="#" role="button">Learn more</a></p>
+      </div>
+    <% } else { %>
+      <div style="margin-top: 50px;text-align: center;">
+        <h1>欢迎使用fogeyWebapp脚手架项目</h1>
+        <p>作者: <a href="https://github.com/DeanTG">Dean</a></p>
+      </div>
+    <% } %>
+    
+    <% if (includeRequirejs) { %>
+    <script data-main="scripts/main.js" src="../scripts/vendor/requirejs/require.js"></script>
+    <% } else { %>
+      <!-- build:js -->
+      <!-- bower:js -->
+      <!-- endbower -->
+      <!-- endbuild -->
+    <% } %>
+  </body>
+</html>
