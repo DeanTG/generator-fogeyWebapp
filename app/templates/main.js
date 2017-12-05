@@ -1,22 +1,22 @@
 <% if (includeRequirejs) { %>
-
 requirejs.config({
-  baseUrl: 'js/lib',
+  baseUrl: 'assets/libs/',
   paths: {
-    // bowerpath:js
-    //bower_path
-    // endbower
+    <% if (includeBootstrap) { %>
+    'bootstrap': '',
+    <% } -%>
+    'jquery': ''
   },
-  <% if (includeBootstrap) { %>
+  
   shim:{
+    <% if (includeBootstrap) { %>
     'bootstrap':{  
       'deps':['jquery']  
-    }  
+    } 
+    <% } -%> 
   },
-  <% } -%>
 });
 requirejs([''], function() {});
-
 <% } else {-%>
 $(function(){
 

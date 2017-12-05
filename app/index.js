@@ -55,10 +55,6 @@ module.exports = class extends Generator {
           name: 'requirejs',
           value: 'includeRequirejs',
           checked: true
-        }, {
-          name: 'normallize',
-          value: 'includeNormallize',
-          checked: true
         }]
       },
       /*{
@@ -93,7 +89,6 @@ module.exports = class extends Generator {
       this.includeBootstrap = hasFeature('includeBootstrap');
       this.includeModernizr = hasFeature('includeModernizr');
       this.includeRequirejs = hasFeature('includeRequirejs');
-      this.includeNormallize = hasFeature('includeNormallize');
       this.includeJQuery = answers.includeJQuery;
     });
   }
@@ -128,7 +123,7 @@ module.exports = class extends Generator {
     this.fs.copyTpl(
       this.templatePath('_package.json'),
       this.destinationPath('package.json'), {
-        appname: this.appname.toString(),
+        appname: '"' + this.appname + '"',
         includeSass: this.includeSass,
         includeBabel: this.options['babel'],
         includeJQuery: this.includeJQuery,
@@ -192,9 +187,13 @@ module.exports = class extends Generator {
     }
     if (this.includeModernizr) {
       bowerJson.dependencies['modernizr'] = '~2.8.1';
-    }
-    if (this.includeNormallize) {
-      bowerJson.dependencies['normalize-css'] = '~7.0.0';
+      bowerJson.overrides = {
+        'modernizr': {
+          'main': [
+            './modernizr.js'
+          ]
+        }
+      };
     }
 
     this.fs.writeJSON('bower.json', bowerJson);
@@ -231,6 +230,7 @@ module.exports = class extends Generator {
       this.templatePath(css),
       this.destinationPath('app/styles/' + css), {
         includeBootstrap: this.includeBootstrap,
+        includeSass: this.includeSass,
       }
     );
   }
@@ -262,7 +262,6 @@ module.exports = class extends Generator {
   _writingMisc() {
     mkdirp('app/images');
     mkdirp('app/assets/libs');
-    mkdirp('app/assets/fonts');
   }
 
   install() {
@@ -285,72 +284,23 @@ module.exports = class extends Generator {
       return;
     }
 
-    // wire Bower file path
-    if (this.includeRequirejs) {
-      wiredep({
-        bowerJson: bowerJson,
-        directory: 'bower_components',
-        ignorePath: /^(\.\.\/)*\.\./,
-        exclude: ['modernizr', 'requirejs'],
-        fileTypes: {
-          js: {
-            block: /(([ \t]*)\/\/\s*bowerpath:*(\S*))(\n|\r|.)*?(\/\/\s*endbower)/gi,
-            detect: {
-              js: /^\/\/bowerequire$/,
-            },
-            replace: {
-              js: function(filePath) {
-                let name = filePath.split('/')[2],
-                  path = filePath.replace('/bower_components', '../scripts/vendor').replace('.js','');
-                return name + ': "' + path + '",';
-              }
-            }
-          },
-        },
-        src: 'app/scripts/*.js'
-      });
-    } else {
-      wiredep({
-        bowerJson: bowerJson,
-        directory: 'bower_components',
-        exclude: ['modernizr'],
-        ignorePath: /^(\.\.\/)*\.\./,
-        fileTypes: {
-          html: {
-            block: /(([ \t]*)\/\/\s*bower:*(\S*))(\n|\r|.)*?(\/\/\s*endbower)/gi,
-            detect: {
-              js: /<script.*src=['"]([^'"]+)/gi,
-            },
-            replace: {
-              js: function(filePath) {
-                return filePath.replace('/bower_components', '../assets/libs/');
-              }
-            }
-          },
-        },
-        src: 'app/htmls/*.html'
-      });
-    }
+    // wire Bower packages to .html
     wiredep({
       bowerJson: bowerJson,
       directory: 'bower_components',
-      exclude: ['/*.js/'],
+      exclude: ['_bootstrap.scss', 'modernizr', 'requirejs'],
       ignorePath: /^(\.\.\/)*\.\./,
-      fileTypes: {
-        html: {
-          block: /(([ \t]*)<!--\s*bowercss:*(\S*)\s*-->)(\n|\r|.)*?(<!--\s*endbower\s*-->)/gi,
-          detect: {
-            css: /<!--csslink-->/gi
-          },
-          replace: {
-            css: function(filePath) {
-              return '<link rel="stylesheet" href="'+filePath.replace('/bower_components', '../assets/libs')+'">'
-            },
-          }
-        },
-      },
       src: 'app/htmls/*.html'
     });
 
+    if (this.includeSass) {
+      // wire Bower packages to .scss
+      wiredep({
+        bowerJson: bowerJson,
+        directory: 'bower_components',
+        ignorePath: /^(\.\.\/)+/,
+        src: 'app/styles/*.scss'
+      });
+    }
   }
 };

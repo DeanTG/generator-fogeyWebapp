@@ -1,8 +1,10 @@
 <% if (includeBootstrap) { %>
-  $icon-font-path: '../fonts/';
+  $icon-font-path: './fonts/';
 <% } %>
-// bower:scss
-// endbower
+<% if (includeSass) { %>
+  // bower:scss
+  // endbower
+<% } %>
 
 .browserupgrade {
   width: 100%;
@@ -13,5 +15,6 @@
   position: fixed;
   top: 0;
   left: 0;
+  z-index: 999;
 }
 

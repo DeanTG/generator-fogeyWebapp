@@ -9,18 +9,18 @@
     <meta name="keywords" content="">
     <title><%= appname %></title>
     
-    <!-- build:css styles/vendor.css -->
+    <!-- build:css ../styles/vendor.css -->
     <!-- bower:css -->
     <!-- endbower -->
     <!-- endbuild -->
 
-    <!-- build:css styles/main.css -->
-    <link rel="stylesheet" href="styles/main.css">
+    <!-- build:css ../styles/main.css -->
+    <link rel="stylesheet" href="../styles/main.css">
     <!-- endbuild -->
 
     <% if (includeModernizr) { %>
-    <!-- build:js scripts/vendor/modernizr.js -->
-    <script src="../scripts/vendor/modernizr/modernizr.js"></script>
+    <!-- build:js ../assets/libs/modernizr.js -->
+    <script src="/bower_components/modernizr/modernizr.js"></script>
     <!-- endbuild -->
     <% } %>
 
@@ -29,8 +29,9 @@
     <!--[if IE]>
       <p class="browserupgrade" style="">你正在使用<strong style="color:red">过时的</strong>浏览器，可能存在一定安全隐患，建议<a href="http://browsehappy.com/" style="color:red">点击这里</a>升级你的浏览器</p>
     <![endif]-->
+    <div class="container">      
     <% if (includeBootstrap) { %>
-      <div class="jumbotron">
+      <div class="jumbotron" style="margin-top: 50px">
         <h1>欢迎使用fogeyWebapp脚手架项目</h1>
         <p>作者: <a href="https://github.com/DeanTG">Dean</a></p>
         <p><a class="btn btn-primary btn-lg" href="#" role="button">Learn more</a></p>
@@ -41,11 +42,13 @@
         <p>作者: <a href="https://github.com/DeanTG">Dean</a></p>
       </div>
     <% } %>
-    
+    </div>
     <% if (includeRequirejs) { %>
-    <script data-main="scripts/main.js" src="../scripts/vendor/requirejs/require.js"></script>
+    <!-- build:js ../assets/libs/require.js-->
+    <script data-main="../scripts/main.js" src="/bower_components/requirejs/require.js"></script>
+    <!-- endbuild -->
     <% } else { %>
-      <!-- build:js -->
+      <!-- build:js ../assets/libs/-->
       <!-- bower:js -->
       <!-- endbower -->
       <!-- endbuild -->
