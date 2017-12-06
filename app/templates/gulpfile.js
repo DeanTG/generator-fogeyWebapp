@@ -11,7 +11,7 @@ const bowerFiles = require('main-bower-files');
 
 const $ = gulpLoadPlugins();
 const reload = browserSync.reload;
-const config = {
+let config = {
   dev: true
 }
 
@@ -46,19 +46,14 @@ gulp.task('scripts', () => {
 });
 <% } -%>
 
-function lint(files) {
-  return gulp.src(files)
+gulp.task('lint', () => {
+  return gulp.src('app/scripts/**/*.js')
     .pipe($.eslint({ fix: true }))
     .pipe(reload({stream: true, once: true}))
     .pipe($.eslint.format())
     .pipe($.if(!browserSync.active, $.eslint.failAfterError()));
-}
-
-gulp.task('lint', () => {
-  return lint('app/scripts/**/*.js')
     .pipe(gulp.dest('app/scripts'));
 });
-
 
 <% if (includeBabel) { -%>
 gulp.task('html', ['styles', 'scripts'], () => {
@@ -106,7 +101,7 @@ gulp.task('extras', () => {
 gulp.task('clean', del.bind(null, ['.tmp', 'dist']));
 
 gulp.task('serve', () => {
-  runSequence(['clean', 'wiredep'], ['styles'<% if (includeBabel) { %>, 'scripts'<% } %>, 'transfer'], () => {
+  runSequence(['clean', 'wiredep', 'transfer'], ['styles'<% if (includeBabel) { %>, 'scripts'<% } %>], () => {
     browserSync.init({
       open: false,
       notify: false,
