@@ -195,6 +195,7 @@ module.exports = class extends Generator {
         }
       };
     }
+    bowerJson.dependencies['customize-common'] = '~1.0.0';
 
     this.fs.writeJSON('bower.json', bowerJson);
     this.fs.copy(
