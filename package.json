@@ -1,5 +1,5 @@
 {
-  "name": "generator-fogeyWebapp",
+  "name": "generator-fogeywebapp",
   "version": "0.1.0",
   "description": "基于 JQ 的WEB 项目，包含gulp、JQ、Bootstrap、sass",
   "main": "index.js",
