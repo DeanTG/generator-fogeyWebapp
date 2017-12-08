@@ -51,7 +51,7 @@ gulp.task('lint', () => {
     .pipe($.eslint({ fix: true }))
     .pipe(reload({stream: true, once: true}))
     .pipe($.eslint.format())
-    .pipe($.if(!browserSync.active, $.eslint.failAfterError()));
+    .pipe($.if(!browserSync.active, $.eslint.failAfterError()))
     .pipe(gulp.dest('app/scripts'));
 });
 
@@ -85,8 +85,8 @@ gulp.task('images', () => {
 
 gulp.task('transfer',  () => {
   return gulp.src(bowerFiles())
-    .pipe($.if('**/*.{eot,svg,ttf,woff,woff2}', gulp.dest('styles/fonts')))
-    .pipe($.if('**/*.js', gulp.dest('assets/libs')));
+    .pipe($.if('**/*.{eot,svg,ttf,woff,woff2}', gulp.dest('app/styles/fonts')))
+    .pipe($.if('**/*.js', gulp.dest('app/assets/libs')));
 });
 
 gulp.task('extras', () => {
@@ -101,7 +101,7 @@ gulp.task('extras', () => {
 gulp.task('clean', del.bind(null, ['.tmp', 'dist']));
 
 gulp.task('serve', () => {
-  runSequence(['clean', 'wiredep', 'transfer'], ['styles'<% if (includeBabel) { %>, 'scripts'<% } %>], () => {
+  runSequence(['clean', 'wiredep'], ['styles'<% if (includeBabel) { %>, 'scripts'<% } %>, 'transfer'], () => {
     browserSync.init({
       open: false,
       notify: false,
