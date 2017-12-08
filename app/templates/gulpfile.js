@@ -7,12 +7,15 @@ const runSequence = require('run-sequence');
 const autoprefixer = require('autoprefixer');
 const cssnano = require('cssnano');
 const bowerFiles = require('main-bower-files');
-
+const zip = require('gulp-zip');
 
 const $ = gulpLoadPlugins();
 const reload = browserSync.reload;
+
 let config = {
-  dev: true
+  appname: <%- appname %>,
+  dev: true,
+  zipUrl: '/Users/deantg/Downloads'
 }
 
 gulp.task('styles', () => {<% if (includeSass) { %>
@@ -30,7 +33,7 @@ gulp.task('styles', () => {<% if (includeSass) { %>
       autoprefixer({browsers: ['> 1%', 'last 2 versions', 'Firefox ESR']})
     ]))
     .pipe($.if(config.dev, $.sourcemaps.write()))
-    .pipe(gulp.dest('.tmp/styles'))
+    .pipe(gulp.dest('.tmp/app/styles'))
     .pipe(reload({stream: true}));
 });
 
@@ -41,7 +44,7 @@ gulp.task('scripts', () => {
   //   .pipe($.if(config.dev, $.sourcemaps.init()))
   //   .pipe($.babel())
   //   .pipe($.if(config.dev, $.sourcemaps.write('.')))
-  //   .pipe(gulp.dest('.tmp/scripts'))
+  //   .pipe(gulp.dest('.tmp/app/scripts'))
   //   .pipe(reload({stream: true}));
 });
 <% } -%>
@@ -152,7 +155,7 @@ gulp.task('wiredep', () => {<% if (includeSass) { %>
 <% } %>
   gulp.src('app/htmls/*.html')
     .pipe(wiredep({
-      exclude: ['_bootstrap.scss', 'modernizr', 'requirejs'],
+      exclude: [<% if (includeSass && includeBootstrap) { %>'_bootstrap.scss' ,<% } %> <% if (includeModernizr) { %>'modernizr' ,<% } %> <% if (includeRequirejs) { %>'requirejs' ,<% } %>],
       ignorePath: /^(\.\.\/)*\.\./
     }))
     .pipe(gulp.dest('app/htmls'));
@@ -161,6 +164,12 @@ gulp.task('wiredep', () => {<% if (includeSass) { %>
 gulp.task('build', ['html', 'images', 'transfer', 'extras'], () => {
   return gulp.src('dist/**/*').pipe($.size({title: 'build', gzip: true}));
 });
+
+gulp.task('zip', ['build'], () => {
+  return gulp.src('dist/**/*')
+    .pipe(zip(`${config.appname}_${new Date().getMonth()+1}${new Date().getDate()}.zip`))
+    .pipe(gulp.dest(config.zipUrl));
+})
 
 gulp.task('default', () => {
   return new Promise(resolve => {

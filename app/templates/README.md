@@ -5,3 +5,4 @@
 ## usage
 * `gulp serve`
 * `gulp build`
+* `gulp zip`

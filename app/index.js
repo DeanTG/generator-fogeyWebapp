@@ -111,6 +111,7 @@ module.exports = class extends Generator {
     this.fs.copyTpl(
       this.templatePath('gulpfile.js'),
       this.destinationPath('gulpfile.js'), {
+        appname: '"' + this.appname + '"',
         includeSass: this.includeSass,
         includeBootstrap: this.includeBootstrap,
         includeBabel: this.options['babel'],
@@ -253,6 +254,7 @@ module.exports = class extends Generator {
       this.templatePath('index.html'),
       this.destinationPath('app/htmls/index.html'), {
         appname: this.appname,
+        includeSass: this.includeSass,
         includeBootstrap: this.includeBootstrap,
         includeModernizr: this.includeModernizr,
         includeRequirejs: this.includeRequirejs,
@@ -261,7 +263,7 @@ module.exports = class extends Generator {
   }
 
   _writingMisc() {
-    mkdirp('app/images');
+    mkdirp('app/images/icons');
     mkdirp('app/assets/libs');
   }
 
