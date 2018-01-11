@@ -111,10 +111,11 @@ module.exports = class extends Generator {
     this.fs.copyTpl(
       this.templatePath('gulpfile.js'),
       this.destinationPath('gulpfile.js'), {
-        appname: '"' + this.appname + '"',
+        appname: `"${this.appname}"`,
         includeSass: this.includeSass,
         includeBootstrap: this.includeBootstrap,
         includeBabel: this.options['babel'],
+        includeModernizr: this.includeModernizr,
         includeRequirejs: this.includeRequirejs
       }
     );
@@ -124,7 +125,7 @@ module.exports = class extends Generator {
     this.fs.copyTpl(
       this.templatePath('_package.json'),
       this.destinationPath('package.json'), {
-        appname: '"' + this.appname + '"',
+        appname: `"${this.appname}"`,
         includeSass: this.includeSass,
         includeBabel: this.options['babel'],
         includeJQuery: this.includeJQuery,
@@ -151,35 +152,18 @@ module.exports = class extends Generator {
       private: true,
       dependencies: {}
     };
-
+    
     if (this.includeBootstrap) {
-      if (this.includeSass) {
-        bowerJson.dependencies = {
-          'bootstrap-sass': '~3.3.7'
-        };
-        bowerJson.overrides = {
-          'bootstrap-sass': {
-            'main': [
-              'assets/stylesheets/_bootstrap.scss',
-              'assets/fonts/bootstrap/*',
-              'assets/javascripts/bootstrap.js'
-            ]
-          }
-        };
-      } else {
-        bowerJson.dependencies = {
-          'bootstrap': '3.3.7'
-        };
-        bowerJson.overrides = {
-          'bootstrap': {
-            'main': [
-              'dist/css/bootstrap.css',
-              'dist/fonts/*',
-              'dist/js/bootstrap.js'
-            ]
-          }
-        };
-      }
+      bowerJson.dependencies['bootstrap'] = '~3.3.7';
+      bowerJson.overrides = {
+        'bootstrap': {
+          'main': [
+            'dist/css/bootstrap.css',
+            'dist/fonts/*',
+            'dist/js/bootstrap.js'
+          ]
+        }
+      };
     } else if (this.includeJQuery) {
       bowerJson.dependencies['jquery'] = '~2.1.1';
     }
@@ -238,21 +222,19 @@ module.exports = class extends Generator {
   }
 
   _writingScripts() {
-    if (this.includeRequirejs) {
-      this.fs.copyTpl(
-        this.templatePath('main.js'),
-        this.destinationPath('app/scripts/main.js'), {
-          includeRequirejs: this.includeRequirejs,
-          includeBootstrap: this.includeBootstrap,
-        }
-      );
-    }
+    this.fs.copyTpl(
+      this.templatePath('index.js'),
+      this.destinationPath('app/scripts/pages/index.js'), {
+        includeRequirejs: this.includeRequirejs,
+        includeBootstrap: this.includeBootstrap,
+      }
+    );
   }
 
   _writingHtml() {
     this.fs.copyTpl(
       this.templatePath('index.html'),
-      this.destinationPath('app/htmls/index.html'), {
+      this.destinationPath('app/index.html'), {
         appname: this.appname,
         includeSass: this.includeSass,
         includeBootstrap: this.includeBootstrap,
@@ -291,19 +273,9 @@ module.exports = class extends Generator {
     wiredep({
       bowerJson: bowerJson,
       directory: 'bower_components',
-      exclude: ['_bootstrap.scss', 'modernizr', 'requirejs'],
+      exclude: ['modernizr', 'requirejs'],
       ignorePath: /^(\.\.\/)*\.\./,
-      src: 'app/htmls/*.html'
+      src: 'app/*.html'
     });
-
-    if (this.includeSass) {
-      // wire Bower packages to .scss
-      wiredep({
-        bowerJson: bowerJson,
-        directory: 'bower_components',
-        ignorePath: /^(\.\.\/)+/,
-        src: 'app/styles/*.scss'
-      });
-    }
   }
 };

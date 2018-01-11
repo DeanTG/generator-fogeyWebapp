@@ -1,5 +1,5 @@
 <!doctype html>
-<html<% if (includeModernizr) { %> class="no-js"<% } %> lang="">
+<html<% if (includeModernizr) { %> class="no-js"<% } %>>
   <head>
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
@@ -9,26 +9,24 @@
     <meta name="keywords" content="">
     <title><%= appname %></title>
     
-    <!-- build:css ../styles/vendor.css -->
+    <!-- build:css assets/libs/vendor.css -->
     <!-- bower:css -->
     <!-- endbower -->
     <!-- endbuild -->
 
-    <!-- build:css ../styles/main.css -->
-    <link rel="stylesheet" href="/app/styles/main.css">
-    <!-- endbuild -->
-
+    <link rel="stylesheet" href="styles/main.css">
     <% if (includeModernizr) { %>
-    <!-- build:js ../assets/libs/modernizr.js -->
+    <!-- build:js assets/libs/modernizr.js -->
     <script src="/bower_components/modernizr/modernizr.js"></script>
     <!-- endbuild -->
     <% } %>
-
   </head>
   <body>
+    <% if (includeModernizr) { %>
     <!--[if IE]>
       <p class="browserupgrade" style="">你正在使用<strong style="color:red">过时的</strong>浏览器，可能存在一定安全隐患，建议<a href="http://browsehappy.com/" style="color:red">点击这里</a>升级你的浏览器</p>
     <![endif]-->
+    <% } %>
     <div class="container">      
     <% if (includeBootstrap) { %>
       <div class="jumbotron" style="margin-top: 50px">
@@ -45,14 +43,15 @@
     <% } %>
     </div>
     <% if (includeRequirejs) { %>
-    <!-- build:js ../assets/libs/require.js-->
-    <script data-main="../scripts/main.js" src="/bower_components/requirejs/require.js"></script>
+    <!-- build:js assets/libs/require.js data-main="scripts/pages/index.js" -->
+    <script data-main="scripts/pages/index.js" src="/bower_components/requirejs/require.js">
     <!-- endbuild -->
+    </script>
     <% } else { %>
-      <!-- build:js ../assets/libs/vendor.js-->
-      <!-- bower:js -->
-      <!-- endbower -->
-      <!-- endbuild -->
+    <!-- build:js assets/libs/vendor.js-->
+    <!-- bower:js -->
+    <!-- endbower -->
+    <!-- endbuild -->
     <% } %>
   </body>
 </html>
