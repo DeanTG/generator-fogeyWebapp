@@ -44,14 +44,14 @@
     </div>
     <% if (includeRequirejs) { %>
     <!-- build:js assets/libs/require.js data-main="scripts/pages/index.js" -->
-    <script data-main="scripts/pages/index.js" src="/bower_components/requirejs/require.js">
+    <script data-main="scripts/pages/index.js" src="/bower_components/requirejs/require.js"></script>
     <!-- endbuild -->
-    </script>
     <% } else { %>
     <!-- build:js assets/libs/vendor.js-->
     <!-- bower:js -->
     <!-- endbower -->
     <!-- endbuild -->
+    <script src="scripts/pages/index.js"></script>
     <% } %>
   </body>
 </html>

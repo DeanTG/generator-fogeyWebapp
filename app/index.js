@@ -3,7 +3,6 @@ const Generator = require('yeoman-generator');
 const commandExists = require('command-exists').sync;
 const yosay = require('yosay');
 const chalk = require('chalk');
-const wiredep = require('wiredep');
 const mkdirp = require('mkdirp');
 const _s = require('underscore.string');
 
@@ -55,6 +54,10 @@ module.exports = class extends Generator {
           name: 'requirejs',
           value: 'includeRequirejs',
           checked: true
+        }, {
+          name: 'JQuery',
+          value: 'includeJQuery',
+          checked: true
         }]
       },
       /*{
@@ -70,13 +73,13 @@ module.exports = class extends Generator {
         }],
         when: answers => answers.features.indexOf('includeBootstrap') !== -1
       },*/
-      {
+      /*{
         type: 'confirm',
         name: 'includeJQuery',
         message: 'Would you like to include jQuery?',
         default: true,
         when: answers => answers.features.indexOf('includeBootstrap') === -1
-      }
+      }*/
     ];
 
     return this.prompt(prompts).then(answers => {
@@ -89,7 +92,7 @@ module.exports = class extends Generator {
       this.includeBootstrap = hasFeature('includeBootstrap');
       this.includeModernizr = hasFeature('includeModernizr');
       this.includeRequirejs = hasFeature('includeRequirejs');
-      this.includeJQuery = answers.includeJQuery;
+      this.includeJQuery = hasFeature('includeJQuery');
     });
   }
 
@@ -152,17 +155,15 @@ module.exports = class extends Generator {
       private: true,
       dependencies: {}
     };
-    
+
     if (this.includeBootstrap) {
       bowerJson.dependencies['bootstrap'] = '~3.3.7';
-      bowerJson.overrides = {
-        'bootstrap': {
-          'main': [
-            'dist/css/bootstrap.css',
-            'dist/fonts/*',
-            'dist/js/bootstrap.js'
-          ]
-        }
+      bowerJson.overrides['bootstrap'] = {
+        'main': [
+          'dist/css/bootstrap.css',
+          'dist/fonts/*',
+          'dist/js/bootstrap.js'
+        ]
       };
     } else if (this.includeJQuery) {
       bowerJson.dependencies['jquery'] = '~2.1.1';
@@ -172,13 +173,11 @@ module.exports = class extends Generator {
     }
     if (this.includeModernizr) {
       bowerJson.dependencies['modernizr'] = '~2.8.1';
-      bowerJson.overrides = {
-        'modernizr': {
-          'main': [
-            './modernizr.js'
-          ]
-        }
-      };
+      bowerJson.overrides['modernizr'] = {
+        'main': [
+          './modernizr.js'
+        ]
+      }
     }
     bowerJson.dependencies['customize-common'] = '~1.0.0';
 
@@ -246,7 +245,7 @@ module.exports = class extends Generator {
 
   _writingMisc() {
     mkdirp('app/images/icons');
-    mkdirp('app/assets/libs');
+    mkdirp('app/assets');
   }
 
   install() {
@@ -262,20 +261,11 @@ module.exports = class extends Generator {
 
   end() {
     const bowerJson = this.fs.readJSON(this.destinationPath('bower.json'));
-    const howToInstall = `After running ${chalk.yellow.bold('npm install & bower install')}, inject your front end dependencies by running ${chalk.yellow.bold('gulp wiredep')}.`;
+    const howToInstall = `After running ${chalk.yellow.bold('npm install & bower install -S')}, inject your front end dependencies by running ${chalk.yellow.bold('gulp wiredep')}.`;
 
     if (this.options['skip-install']) {
       this.log(howToInstall);
       return;
     }
-
-    // wire Bower packages to .html
-    wiredep({
-      bowerJson: bowerJson,
-      directory: 'bower_components',
-      exclude: ['modernizr', 'requirejs'],
-      ignorePath: /^(\.\.\/)*\.\./,
-      src: 'app/*.html'
-    });
   }
 };

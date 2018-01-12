@@ -3,6 +3,11 @@
 
 
 ## usage
-* `gulp serve`
-* `gulp build`
-* `gulp zip`
+* `gulp serve`  // 开发环境
+* `gulp build`  // 打包
+* `gulp zip`  // 打包压缩
+
+
+
+
+

@@ -38,20 +38,9 @@
     "gulp-useref": "^3.0.0",
     "gulp-zip": "^4.0.0",
     "run-sequence": "^1.2.2",
-    "wiredep": "^4.0.0"
-  },
-  "eslintConfig": {
-    "env": {<% if (includeBabel) { %>
-      "es6": true,<% } %>
-      "node": true,
-      "browser": true<% if (includeJQuery) { %>,
-      "jquery": true<% } %>
-    },
-    "rules": {
-      "quotes": [
-        2,
-        "single"
-      ]
-    }
+    "wiredep": "^4.0.0",
+    "replace-in-file": "^3.1.0",
+    "gulp-rev": "^8.1.1",
+    "gulp-rev-collector": "^1.2.4"
   }
 }

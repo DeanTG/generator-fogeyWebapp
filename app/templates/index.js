@@ -7,9 +7,7 @@ requirejs.config({
   },
   shim:{
     <% if (includeBootstrap) { %>
-    'bootstrap':{  
-      'deps':['jquery']  
-    } 
+    'bootstrap': ['jquery']  
     <% } -%> 
   },
 });

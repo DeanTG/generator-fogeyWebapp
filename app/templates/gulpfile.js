@@ -8,6 +8,9 @@ const autoprefixer = require('autoprefixer');
 const cssnano = require('cssnano');
 const bowerFiles = require('main-bower-files');
 const zip = require('gulp-zip');
+const replace = require('replace-in-file');
+const rev = require('gulp-rev');
+const revCollector = require('gulp-rev-collector');
 
 const $ = gulpLoadPlugins();
 const reload = browserSync.reload;
@@ -18,7 +21,8 @@ let config = {
   zipUrl: '/Users/deantg/Downloads'
 }
 
-gulp.task('styles', () => {<% if (includeSass) { %>
+gulp.task('styles', () => {
+  <% if (includeSass) { %>
   return gulp.src('app/styles/**/*.scss')
     .pipe($.plumber())
     .pipe($.if(config.dev, $.sourcemaps.init()))
@@ -26,19 +30,20 @@ gulp.task('styles', () => {<% if (includeSass) { %>
       outputStyle: 'expanded',
       precision: 10,
       includePaths: ['.']
-    }).on('error', $.sass.logError))<% } else { %>
+    }).on('error', $.sass.logError))
+  <% } else { %>
   return gulp.src('app/styles/*.css')
-    .pipe($.if(config.dev, $.sourcemaps.init()))<% } %>
-    .pipe($.postcss([
-      autoprefixer({browsers: ['> 1%', 'last 2 versions', 'Firefox ESR']})
+    .pipe($.if(config.dev, $.sourcemaps.init()))
+  <% } %>
+  .pipe($.postcss([
+      autoprefixer({ browsers: ['> 1%', 'last 2 versions'] })
     ]))
     .pipe($.if(config.dev, $.sourcemaps.write()))
     .pipe(gulp.dest('.tmp/styles'))
     .pipe($.if(!config.dev, gulp.dest('dist/styles')))
-    .pipe(reload({stream: true}));
+    .pipe(reload({ stream: true }));
 });
 
-<% if (includeBabel) { -%>
 gulp.task('scripts', () => {
   return gulp.src('app/scripts/**/*.js')
     .pipe($.plumber())
@@ -47,30 +52,23 @@ gulp.task('scripts', () => {
     .pipe($.if(config.dev, $.sourcemaps.write('.')))
     .pipe(gulp.dest('.tmp/scripts'))
     .pipe($.if(!config.dev, gulp.dest('dist/scripts')))
-    .pipe(reload({stream: true}));
+    .pipe(reload({ stream: true }));
 });
-<% } -%>
 
-<% if (includeBabel) { -%>
 gulp.task('html', ['styles', 'scripts'], () => {
-<% } else { -%>
-gulp.task('html', ['styles'], () => {
-<% } -%>
   return gulp.src('app/*.html')
-    .pipe($.useref({searchPath: ['.tmp', 'app', '.']}))
-    .pipe($.if(/\.js$/, $.uglify({compress: {drop_console: true}})))
-    .pipe($.if(/\.css$/, $.postcss([cssnano({safe: true, autoprefixer: false})])))
-    .pipe($.if(/\.html$/, $.htmlmin({
-      minifyCSS: true,
-      // minifyJS: {compress: {drop_console: true}},
-      // collapseWhitespace: true,
-      // processConditionalComments: true,
-      // removeComments: true,
-      // removeEmptyAttributes: true,
-      // removeScriptTypeAttributes: true,
-      // removeStyleLinkTypeAttributes: true
-    })))
+    .pipe($.useref({ searchPath: ['.tmp', 'app', '.'] }))
+    .pipe($.if(/\.js$/, $.uglify({ compress: { drop_console: true } })))
+    .pipe($.if(/\.css$/, $.postcss([cssnano({ safe: true, autoprefixer: false })])))
     .pipe(gulp.dest('dist/'));
+});
+
+gulp.task('devApi', () => {
+  replace.sync({
+    files: '',
+    from: '',
+    to: '',
+  })
 });
 
 gulp.task('images', () => {
@@ -79,26 +77,49 @@ gulp.task('images', () => {
     .pipe(gulp.dest('dist/images'));
 });
 
-gulp.task('transfer',  () => {
+gulp.task('bowerFiles', () => {
   return gulp.src(bowerFiles())
     .pipe($.if('**/*.{eot,svg,ttf,woff,woff2}', gulp.dest('app/assets/fonts')))
     .pipe($.if('**/*.js', gulp.dest('app/assets/libs')));
 });
 
+gulp.task('manifest', ['html'], () => {
+  gulp.src(['dist/styles/*.css', 'dist/scripts/pages/*.js'])
+    .pipe(rev())
+    .pipe($.if(/\.css$/, gulp.dest('dist/styles')))
+    .pipe($.if(/\.js/, gulp.dest('dist/scripts/pages')))
+    .pipe(rev.manifest())
+    .pipe(gulp.dest('.rev'));
+});
+
+gulp.task('rev', ['manifest'], () => {
+  gulp.src(['.rev/*.json', 'dist/*.html'])
+    .pipe(revCollector())
+    .pipe($.htmlmin({
+      minifyCSS: true,
+      minifyJS: { compress: { drop_console: true } },
+      collapseWhitespace: true,
+      processConditionalComments: true,
+      removeComments: true,
+      removeEmptyAttributes: true,
+      removeScriptTypeAttributes: true,
+      removeStyleLinkTypeAttributes: true
+    }))
+    .pipe(gulp.dest('dist'));
+});
+
 gulp.task('extras', () => {
   return gulp.src([
-    'app/*',
     'app/assets/**/*',
-    '!app/*.html'
   ], {
     dot: true
-  }).pipe(gulp.dest('dist'));
+  }).pipe(gulp.dest('dist/assets'));
 });
 
 gulp.task('clean', del.bind(null, ['.tmp', 'dist']));
 
 gulp.task('serve', () => {
-  runSequence(['clean', 'wiredep'], ['styles'<% if (includeBabel) { %>, 'scripts'<% } %>, 'transfer'], () => {
+  runSequence(['clean', 'wiredep'], ['styles', 'scripts', 'bowerFiles'], () => {
     browserSync.init({
       open: false,
       notify: false,
@@ -113,16 +134,12 @@ gulp.task('serve', () => {
 
     gulp.watch([
       'app/*.html',
-<% if (!includeBabel) { -%>
       'app/scripts/**/*.js',
-<% } -%>
       'app/images/**/*',
     ]).on('change', reload);
 
     gulp.watch('app/styles/**/*.<%= includeSass ? 'scss' : 'css' %>', ['styles']);
-<% if (includeBabel) { -%>
     gulp.watch('app/scripts/**/*.js', ['scripts']);
-<% } -%>
     gulp.watch('bower.json', ['wiredep']);
   });
 });
@@ -139,14 +156,15 @@ gulp.task('serve:dist', ['default'], () => {
 });
 
 // inject bower components
+// run bower install xx -S
 gulp.task('wiredep', () => {
   gulp.src('app/*.html')
     .pipe(wiredep({
-      exclude: [<% if (includeModernizr) { %>'modernizr',<% } %> <% if (includeRequirejs) { %>'requirejs'<% } %>],
+      exclude: [<% if (includeModernizr) { %>'modernizr', <% } %> <% if (includeRequirejs) { %>'requirejs'<% } %>],
       ignorePath: /^(\.\.\/)*\.\./
     }))
     .pipe(gulp.dest('app'));
-    
+
   gulp.src('app/scripts/**/*.js')
     .pipe(wiredep({
       exclude: ['modernizr', 'requirejs'],
@@ -175,8 +193,8 @@ gulp.task('wiredep', () => {
     .pipe(gulp.dest('app/scripts/'));
 });
 
-gulp.task('build', ['html', 'images', 'transfer', 'extras'], () => {
-  return gulp.src('dist/**/*').pipe($.size({title: 'build', gzip: true}));
+gulp.task('build', ['rev', 'images', 'bowerFiles', 'extras'], () => {
+  return gulp.src('dist/**/*').pipe($.size({ title: 'build', gzip: true }));
 });
 
 gulp.task('zip', ['build'], () => {
