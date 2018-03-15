@@ -11,6 +11,7 @@ const zip = require('gulp-zip');
 const replace = require('replace-in-file');
 const rev = require('gulp-rev');
 const revCollector = require('gulp-rev-collector');
+const revdel = require('gulp-rev-delete-original');
 
 const $ = gulpLoadPlugins();
 const reload = browserSync.reload;
@@ -18,6 +19,7 @@ const reload = browserSync.reload;
 let config = {
   appname: <%- appname %>,
   dev: true,
+  hash: false,
   zipUrl: '/Users/deantg/Downloads'
 }
 
@@ -60,15 +62,17 @@ gulp.task('html', ['styles', 'scripts'], () => {
     .pipe($.useref({ searchPath: ['.tmp', 'app', '.'] }))
     .pipe($.if(/\.js$/, $.uglify({ compress: { drop_console: true } })))
     .pipe($.if(/\.css$/, $.postcss([cssnano({ safe: true, autoprefixer: false })])))
+    .pipe($.if(/\.html$/,$.htmlmin({
+      minifyCSS: true,
+      minifyJS: { compress: { drop_console: true } },
+      collapseWhitespace: true,
+      processConditionalComments: true,
+      removeComments: true,
+      removeEmptyAttributes: true,
+      removeScriptTypeAttributes: true,
+      removeStyleLinkTypeAttributes: true
+    })))
     .pipe(gulp.dest('dist/'));
-});
-
-gulp.task('devApi', () => {
-  replace.sync({
-    files: '',
-    from: '',
-    to: '',
-  })
 });
 
 gulp.task('images', () => {
@@ -84,28 +88,23 @@ gulp.task('bowerFiles', () => {
 });
 
 gulp.task('manifest', ['html'], () => {
-  gulp.src(['dist/styles/*.css', 'dist/scripts/pages/*.js'])
-    .pipe(rev())
-    .pipe($.if(/\.css$/, gulp.dest('dist/styles')))
-    .pipe($.if(/\.js/, gulp.dest('dist/scripts/pages')))
-    .pipe(rev.manifest())
-    .pipe(gulp.dest('.rev'));
+  if(config.hash && !config.dev){
+    gulp.src(['dist/styles/*.css', 'dist/scripts/pages/*.js'])
+      .pipe(rev())
+      .pipe(revdel())
+      .pipe($.if(/\.css$/, gulp.dest('dist/styles')))
+      .pipe($.if(/\.js/, gulp.dest('dist/scripts/pages')))
+      .pipe(rev.manifest())
+      .pipe(gulp.dest('.rev'));
+  }
 });
 
 gulp.task('rev', ['manifest'], () => {
-  gulp.src(['.rev/*.json', 'dist/*.html'])
-    .pipe(revCollector())
-    .pipe($.htmlmin({
-      minifyCSS: true,
-      minifyJS: { compress: { drop_console: true } },
-      collapseWhitespace: true,
-      processConditionalComments: true,
-      removeComments: true,
-      removeEmptyAttributes: true,
-      removeScriptTypeAttributes: true,
-      removeStyleLinkTypeAttributes: true
-    }))
-    .pipe(gulp.dest('dist'));
+  if(config.hash && !config.dev){
+    gulp.src(['.rev/*.json', 'dist/*.html'])
+      .pipe(revCollector())
+      .pipe(gulp.dest('dist'));
+  }
 });
 
 gulp.task('extras', () => {
@@ -116,7 +115,7 @@ gulp.task('extras', () => {
   }).pipe(gulp.dest('dist/assets'));
 });
 
-gulp.task('clean', del.bind(null, ['.tmp', 'dist']));
+gulp.task('clean', del.bind(null, ['.tmp', 'dist', '.rev']));
 
 gulp.task('serve', () => {
   runSequence(['clean', 'wiredep'], ['styles', 'scripts', 'bowerFiles'], () => {
@@ -164,7 +163,14 @@ gulp.task('wiredep', () => {
       ignorePath: /^(\.\.\/)*\.\./
     }))
     .pipe(gulp.dest('app'));
-
+<% if (includeSass) { %>
+  gulp.src('app/styles/*.scss')
+  .pipe($.filter(file => file.stat && file.stat.size))
+  .pipe(wiredep({
+    ignorePath: /^(\.\.\/)+/
+  }))
+  .pipe(gulp.dest('app/styles'));
+<% } %>
   gulp.src('app/scripts/**/*.js')
     .pipe(wiredep({
       exclude: ['modernizr', 'requirejs'],
@@ -182,7 +188,7 @@ gulp.task('wiredep', () => {
               if (config.dev) {
                 path = filePath.replace('.js', '');
               } else {
-                path = '../assets/libs/' + filePath.split('/').pop().replace('.js', '');
+                path = '../../assets/libs/' + filePath.split('/').pop().replace('.js', '');
               }
               return `"${name}": "${path}",`;
             }

@@ -153,10 +153,13 @@ module.exports = class extends Generator {
     const bowerJson = {
       name: _s.slugify(this.appname),
       private: true,
-      dependencies: {}
+      dependencies: {},
+      overrides: {}
     };
 
     if (this.includeBootstrap) {
+      bowerJson.dependencies['sass-preset'] = '~1.0.1';
+      bowerJson.dependencies['reset-style'] = '~1.0.0';
       bowerJson.dependencies['bootstrap'] = '~3.3.7';
       bowerJson.overrides['bootstrap'] = {
         'main': [
@@ -179,7 +182,6 @@ module.exports = class extends Generator {
         ]
       }
     }
-    bowerJson.dependencies['customize-common'] = '~1.0.0';
 
     this.fs.writeJSON('bower.json', bowerJson);
     this.fs.copy(
